@@ -14,7 +14,8 @@ class Account extends Model
     protected $fillable = [
         'user_id',
         'account_name',
-        'account_type'
+        'account_type',
+        'balance'
     ];
 
     public function user(): BelongsTo
