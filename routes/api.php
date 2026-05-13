@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\TransactionController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\FinancialStatsController;
 use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\FinancialHealthController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -25,6 +26,9 @@ Route::middleware('auth:sanctum')->group(function () {
     
     Route::get('/transactions', [TransactionController::class, 'index']);
     Route::post('/transactions/add', [TransactionController::class, 'store']);
+    Route::get('/transactions/{id}', [TransactionController::class, 'show']);
+    Route::put('/transactions/{id}', [TransactionController::class, 'update']);
+    Route::delete('/transactions/{id}', [TransactionController::class, 'destroy']);
 
     Route::get('/categories', [CategoryController::class, 'index']);
     Route::post('/categories/add', [CategoryController::class, 'store']);
@@ -32,6 +36,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/stats/summary', [FinancialStatsController::class, 'index']);
 
     Route::get('/dashboard', [DashboardController::class, 'index']);
+
+    Route::get('/financial-health', [FinancialHealthController::class, 'index']);
+    Route::post('/financial-health/chat', [FinancialHealthController::class, 'chat']);
 });
 
 Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'])

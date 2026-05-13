@@ -32,6 +32,21 @@ class Transaction extends Model
         return $this->belongsTo(User::class);
     }
 
+    protected static function booted()
+    {
+        static::saved(function ($transaction) {
+            if ($transaction->account) {
+                $transaction->account->recalculateBalance(); 
+            }
+        });
+
+        static::deleted(function ($transaction) {
+            if ($transaction->account) {
+                $transaction->account->recalculateBalance();
+            }
+        });
+    }
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);

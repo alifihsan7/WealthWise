@@ -23,6 +23,15 @@ class Account extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function recalculateBalance()
+    {
+        $income = $this->transactions()->where('transaction_type', 'INCOME')->sum('transaction_amount');
+        $expense = $this->transactions()->where('transaction_type', 'EXPENSE')->sum('transaction_amount');
+        
+        $this->balance = $income - $expense;
+        $this->save();
+    }
+
     public function outgoingTransactions(): HasMany
     {
         return $this->hasMany(Transaction::class, 'account_id');
