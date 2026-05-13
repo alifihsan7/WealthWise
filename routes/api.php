@@ -39,6 +39,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/financial-health', [FinancialHealthController::class, 'index']);
     Route::post('/financial-health/chat', [FinancialHealthController::class, 'chat']);
+
+    Route::get('/goals', [FinancialGoalController::class, 'index']);
+    Route::post('/goals', [FinancialGoalController::class, 'store']);
+    Route::get('/goals/{id}', [FinancialGoalController::class, 'show']);
+    Route::put('/goals/{id}', [FinancialGoalController::class, 'update']);
+    Route::delete('/goals/{id}', [FinancialGoalController::class, 'destroy']);
 });
 
 Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'])
