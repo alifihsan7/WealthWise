@@ -13,7 +13,8 @@ class Category extends Model
 
     protected $fillable = [
         'user_id',
-        'category_type'
+        'category_name',
+        'type',
     ];
 
     public function user(): BelongsTo

@@ -10,11 +10,18 @@ return new class extends Migration
     {
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
-            // Relasi ke users (jika user dihapus, kategorinya ikut terhapus)
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete(); 
-            $table->enum('category_type', ['INCOME', 'EXPENSE']);
-            $table->timestamps(); // Membuat created_at & updated_at
-            $table->softDeletes(); // Membuat deleted_at
+            
+            // 1. Tambahkan nullable() agar sistem bisa menyimpan kategori default
+            $table->foreignId('user_id')->nullable()->constrained()->cascadeOnDelete(); 
+            
+            // 2. Tambahkan kolom untuk menyimpan nama kategori
+            $table->string('category_name');
+            
+            // 3. Ubah nama kolom menjadi 'type'
+            $table->enum('type', ['INCOME', 'EXPENSE']);
+            
+            $table->timestamps(); 
+            $table->softDeletes(); 
         });
     }
 

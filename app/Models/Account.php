@@ -32,4 +32,9 @@ class Account extends Model
     {
         return $this->hasMany(Transaction::class, 'to_account_id');
     }
+
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
+    }
 }

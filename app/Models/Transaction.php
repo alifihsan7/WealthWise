@@ -22,6 +22,7 @@ class Transaction extends Model
     ];
 
     protected $casts = [
+        'transaction_amount' => 'float',
         'transaction_date' => 'datetime',
         'transaction_amount' => 'decimal:2', 
     ];
@@ -42,6 +43,16 @@ class Transaction extends Model
     }
 
     public function destinationAccount(): BelongsTo
+    {
+        return $this->belongsTo(Account::class, 'to_account_id');
+    }
+
+    public function account()
+    {
+        return $this->belongsTo(Account::class, 'account_id');
+    }
+
+    public function toAccount()
     {
         return $this->belongsTo(Account::class, 'to_account_id');
     }
