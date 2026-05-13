@@ -166,7 +166,7 @@ class StatisticsController extends Controller
 
             $percentage =
                 $baseTotal > 0
-                ? round(($total / $baseTotal)* 100)
+                ? round(($total / $baseTotal) * 100)
                 : 0;
 
             return [
