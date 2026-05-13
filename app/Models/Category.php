@@ -15,6 +15,8 @@ class Category extends Model
         'user_id',
         'category_name',
         'type',
+        'budget_limit',
+        'budget_period',
     ];
 
     public function user(): BelongsTo

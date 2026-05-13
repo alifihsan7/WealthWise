@@ -9,49 +9,76 @@ use Illuminate\Support\Facades\Auth;
 
 class CategoryController extends Controller
 {
-    /**
-     * Menampilkan daftar kategori milik pengguna dan default sistem.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        $categories = Category::where('user_id', Auth::id())
-            ->orWhereNull('user_id')
-            ->get();
+        $userId = Auth::id();
+        $period = $request->query('period', 'monthly');
+        $year   = (int) $request->query('year',  now()->year);
+        $month  = (int) $request->query('month', now()->month);
+
+        $categories = Category::where(function ($query) use ($userId) {
+                $query->where('user_id', $userId)
+                      ->orWhereNull('user_id');
+            })
+            ->get()
+            ->map(function ($category) use ($userId, $period, $year, $month) {
+                $data = $category->toArray();
+
+                if ($category->type === 'EXPENSE') {
+                    $txQuery = $category->transactions()
+                        ->where('user_id', $userId)
+                        ->where('transaction_type', 'EXPENSE')
+                        ->whereYear('transaction_date', $year);
+
+                    if ($period === 'monthly') {
+                        $txQuery->whereMonth('transaction_date', $month);
+                    }
+
+                    $data['spent'] = (float) $txQuery->sum('transaction_amount');
+                }
+
+                return $data;
+            });
 
         return response()->json([
             'status' => 'success',
-            'data' => $categories
+            'data'   => $categories,
         ]);
     }
 
-    /**
-     * Menyimpan kategori baru (custom) milik pengguna.
-     */
     public function store(Request $request)
     {
         $validatedData = $request->validate([
             'category_name' => 'required|string|max:255',
-            'type' => 'required|in:INCOME,EXPENSE',
+            'type'          => 'required|in:INCOME,EXPENSE',
+            'budget_limit'  => 'nullable|numeric|min:0',
+            'budget_period' => 'nullable|in:WEEKLY,MONTHLY,YEARLY',
         ]);
 
         $validatedData['user_id'] = Auth::id();
 
+        if ($validatedData['type'] !== 'EXPENSE') {
+            $validatedData['budget_limit']  = null;
+            $validatedData['budget_period'] = null;
+        }
+
         $category = Category::create($validatedData);
 
         return response()->json([
-            'status' => 'success',
+            'status'  => 'success',
             'message' => 'Category created successfully',
-            'data' => $category
+            'data'    => $category,
         ], 201);
     }
 
-    /**
-     * Menampilkan detail satu kategori.
-     */
     public function show(string $id)
     {
-        $category = Category::where(function($query) {
-                $query->where('user_id', Auth::id())
+        $userId = Auth::id();
+        $year  = now()->year;
+        $month = now()->month;
+
+        $category = Category::where(function ($query) use ($userId) {
+                $query->where('user_id', $userId)
                       ->orWhereNull('user_id');
             })
             ->where('id', $id)
@@ -59,64 +86,77 @@ class CategoryController extends Controller
 
         if (!$category) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Category not found'
+                'status'  => 'error',
+                'message' => 'Category not found',
             ], 404);
+        }
+
+        $data = $category->toArray();
+
+        if ($category->type === 'EXPENSE') {
+            $data['spent'] = (float) $category->transactions()
+                ->where('user_id', $userId)
+                ->where('transaction_type', 'EXPENSE')
+                ->whereYear('transaction_date', $year)
+                ->whereMonth('transaction_date', $month)
+                ->sum('transaction_amount');
         }
 
         return response()->json([
             'status' => 'success',
-            'data' => $category
+            'data'   => $data,
         ]);
     }
 
-    /**
-     * Mengupdate kategori custom milik pengguna.
-     */
     public function update(Request $request, string $id)
     {
         $category = Category::where('user_id', Auth::id())->find($id);
 
         if (!$category) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Category not found or you do not have permission to edit this'
+                'status'  => 'error',
+                'message' => 'Category not found or you do not have permission to edit this',
             ], 403);
         }
 
         $validatedData = $request->validate([
             'category_name' => 'sometimes|required|string|max:255',
-            'type' => 'sometimes|required|in:INCOME,EXPENSE',
+            'type'          => 'sometimes|required|in:INCOME,EXPENSE',
+            'budget_limit'  => 'nullable|numeric|min:0',
+            'budget_period' => 'nullable|in:WEEKLY,MONTHLY,YEARLY',
         ]);
+
+        $type = $validatedData['type'] ?? $category->type;
+        if ($type !== 'EXPENSE') {
+            $validatedData['budget_limit']  = null;
+            $validatedData['budget_period'] = null;
+        }
 
         $category->update($validatedData);
 
         return response()->json([
-            'status' => 'success',
+            'status'  => 'success',
             'message' => 'Category updated successfully',
-            'data' => $category
+            'data'    => $category,
         ]);
     }
 
-    /**
-     * Menghapus kategori custom milik pengguna.
-     */
     public function destroy(string $id)
     {
         $category = Category::where('user_id', Auth::id())->find($id);
 
         if (!$category) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Category not found or you do not have permission to delete this'
+                'status'  => 'error',
+                'message' => 'Category not found or you do not have permission to delete this',
             ], 403);
         }
 
         $category->delete();
 
         return response()->json([
-            'status' => 'success',
-            'message' => 'Category deleted successfully'
+            'status'  => 'success',
+            'message' => 'Category deleted successfully',
         ]);
     }
 }
