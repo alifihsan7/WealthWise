@@ -16,8 +16,6 @@ class FinancialGoal extends Model
         'amount_per_period', // Jumlah menabung per periode
         'start_date', 
         'target_date',      // Tanggal ekspektasi tercapai
-        'icon', 
-        'color_theme'
     ];
 
     // Kolom virtual tambahan untuk dikirim ke React

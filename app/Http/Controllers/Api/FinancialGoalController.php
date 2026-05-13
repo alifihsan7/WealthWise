@@ -37,8 +37,6 @@ class FinancialGoalController extends Controller
             'filling_plan'      => 'required|in:DAILY,WEEKLY,MONTHLY,YEARLY',
             'amount_per_period' => 'required|numeric|min:1',
             'start_date'        => 'required|date',
-            'icon'              => 'nullable|string',
-            'color_theme'       => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -56,8 +54,6 @@ class FinancialGoalController extends Controller
             'filling_plan'      => $request->filling_plan,
             'amount_per_period' => $request->amount_per_period,
             'start_date'        => $request->start_date,
-            'icon'              => $request->icon ?? 'Target',
-            'color_theme'       => $request->color_theme ?? 'emerald',
         ]);
 
         return response()->json([
