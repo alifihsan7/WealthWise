@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\TransactionController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\FinancialStatsController;
 use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\ReceiptScanController;
 use App\Http\Controllers\Api\FinancialHealthController;
 use App\Http\Controllers\Api\ProfileController;
 
@@ -33,10 +34,14 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/categories', [CategoryController::class, 'index']);
     Route::post('/categories/add', [CategoryController::class, 'store']);
+    Route::get('/categories/{id}', [CategoryController::class, 'show']);
+    Route::put('/categories/{id}', [CategoryController::class, 'update']);
+    Route::delete('/categories/{id}', [CategoryController::class, 'destroy']);
 
     Route::get('/stats/summary', [FinancialStatsController::class, 'index']);
 
     Route::get('/dashboard', [DashboardController::class, 'index']);
+    Route::post('/receipt/scan', [ReceiptScanController::class, 'scan']);
 
     Route::get('/profile', [ProfileController::class, 'show']);
     Route::put('/profile', [ProfileController::class, 'update']);
