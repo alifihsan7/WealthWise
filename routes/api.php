@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\FinancialStatsController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\FinancialHealthController;
+use App\Http\Controllers\Api\ProfileController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -36,6 +37,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/stats/summary', [FinancialStatsController::class, 'index']);
 
     Route::get('/dashboard', [DashboardController::class, 'index']);
+
+    Route::get('/profile', [ProfileController::class, 'show']);
+    Route::put('/profile', [ProfileController::class, 'update']);
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword']);
 
     Route::get('/financial-health', [FinancialHealthController::class, 'index']);
     Route::post('/financial-health/chat', [FinancialHealthController::class, 'chat']);

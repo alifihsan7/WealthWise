@@ -13,12 +13,11 @@ class FinancialHealthService
 {
     public function getSummaryData()
     {
-        $userId = Auth::id(); // Asumsi user login
+        $userId = Auth::id(); 
 
         $transactions = Transaction::where('user_id', $userId)->get();
         $accounts = Account::where('user_id', $userId)->get();
 
-        // --- 1. KALKULASI DASAR ---
         $totalIncome = $transactions->where('transaction_type', 'INCOME')->sum('transaction_amount');
         $totalExpense = $transactions->where('transaction_type', 'EXPENSE')->sum('transaction_amount');
         $netWorth = $accounts->sum('balance');
@@ -28,7 +27,11 @@ class FinancialHealthService
         
         $avgMonthlyExpense = $totalExpense > 0 ? $totalExpense : 1;
         $emergencyMonths = round($netWorth / $avgMonthlyExpense, 1);
-        $dtiRatio = $totalIncome > 0 ? round(($totalExpense / $totalIncome) * 100) : 0;
+        
+        $totalExpense = $transactions->where('transaction_type', 'EXPENSE')
+                             ->sum('transaction_amount');
+
+        $expenseRatio = $totalIncome > 0 ? round(($totalExpense / $totalIncome) * 100) : 0;
 
         $score = 100;
         if ($expenseRatio > 70) $score -= 30; elseif ($expenseRatio > 50) $score -= 15;
@@ -54,7 +57,7 @@ class FinancialHealthService
                 'savingRatio' => $savingRatio,
                 'expenseRatio' => $expenseRatio,
                 'emergencyMonths' => $emergencyMonths,
-                'dtiRatio' => $dtiRatio,
+                'expenseRatio' => $expenseRatio,
                 'score' => $score,
             ],
             // Map data dari database agar formatnya cocok dengan React
@@ -87,41 +90,54 @@ class FinancialHealthService
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . env('GROQ_API_KEY'),
                 'Content-Type' => 'application/json',
-            ])->post('[https://api.groq.com/openai/v1/chat/completions](https://api.groq.com/openai/v1/chat/completions)', [
+            ])->post('https://api.groq.com/openai/v1/chat/completions', [
                 'model' => 'llama-3.3-70b-versatile',
                 'messages' => [['role' => 'system', 'content' => $prompt]],
-                'temperature' => 0.4, // Suhu rendah agar AI fokus pada format JSON
+                'temperature' => 0.3,
             ]);
 
             if ($response->successful()) {
                 $content = $response->json()['choices'][0]['message']['content'];
                 
-                // Bersihkan tag markdown jika AI membandel
-                $content = str_replace(['
-```json', '```'], '', $content);
-                $aiInsights = json_decode(trim($content), true);
+                // 1. REKAM APA KATA GROQ KE LOG (Untuk debugging)
+                \Illuminate\Support\Facades\Log::info("Balasan Asli Groq: " . $content);
 
-                if (is_array($aiInsights)) {
-                    // Simpan hasil dari Groq ke Database
-                    foreach ($aiInsights as $item) {
-                        Insight::create([
-                            'user_id' => $userId,
-                            'emoji' => $item['emoji'] ?? '💡',
-                            'title' => $item['title'] ?? 'Insight Keuangan',
-                            'desc' => $item['desc'] ?? '-',
-                            'actionLabel' => $item['actionLabel'] ?? null,
-                            'urgent' => $item['urgent'] ?? false,
-                        ]);
+                // 2. EKSTRAK HANYA ARRAY JSON-NYA SAJA MENGGUNAKAN REGEX
+                // Mencari apa pun yang berada di antara [ dan ]
+                preg_match('/\[.*\]/s', $content, $matches);
+                
+                if (!empty($matches) && isset($matches[0])) {
+                    // Coba terjemahkan teks yang sudah dibersihkan ke Array PHP
+                    $aiInsights = json_decode($matches[0], true);
+
+                    if (is_array($aiInsights)) {
+                        // Simpan hasil dari Groq ke Database
+                        foreach ($aiInsights as $item) {
+                            Insight::create([
+                                'user_id' => $userId,
+                                'emoji' => $item['emoji'] ?? '💡',
+                                'title' => $item['title'] ?? 'Insight Keuangan',
+                                'desc' => $item['desc'] ?? '-',
+                                'actionLabel' => $item['actionLabel'] ?? null,
+                                'urgent' => $item['urgent'] ?? false,
+                            ]);
+                        }
+                        // Ambil ulang dari database agar ID terikat
+                        return Insight::where('user_id', $userId)->whereDate('created_at', Carbon::today())->get();
+                    } else {
+                        \Illuminate\Support\Facades\Log::error("JSON Decode Gagal. Hasil Regex: " . $matches[0]);
                     }
-                    // Ambil ulang dari database agar ID terikat
-                    return Insight::where('user_id', $userId)->whereDate('created_at', Carbon::today())->get();
+                } else {
+                    \Illuminate\Support\Facades\Log::error("Regex tidak menemukan Array JSON pada: " . $content);
                 }
+            } else {
+                \Illuminate\Support\Facades\Log::error("Groq API Error: " . $response->body());
             }
         } catch (\Exception $e) {
-            // Jika API Groq error/down, kembalikan collection kosong agar aplikasi tidak crash
-            return collect([]); 
+            \Illuminate\Support\Facades\Log::error("Exception FinancialService: " . $e->getMessage());
         }
 
+        // Jika gagal di titik mana pun, kembalikan kosong agar React tidak crash
         return collect([]);
     }
 }

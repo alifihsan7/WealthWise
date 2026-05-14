@@ -18,7 +18,6 @@ class FinancialHealthController extends Controller
 
     public function index()
     {
-        // ... (KODE INDEX TETAP SAMA SEPERTI SEBELUMNYA) ...
         $data = $this->financialService->getSummaryData();
         return response()->json([
             'status' => 'success',
@@ -78,7 +77,7 @@ class FinancialHealthController extends Controller
         return response()->json([
             'status' => 'error', 
             'message' => 'API Groq Error',
-            'details' => $response->json(), // <-- Ini akan menampilkan alasan asli dari Groq
+            'details' => $response->json(),
             'status_code' => $response->status()
         ], 500);
     }
