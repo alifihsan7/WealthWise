@@ -9,6 +9,8 @@ use App\Http\Controllers\Api\TransactionController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\FinancialStatsController;
 use App\Http\Controllers\Api\DashboardController;
+
+use App\Http\Controllers\Api\StatisticsController;
 use App\Http\Controllers\Api\FinancialHealthController;
 use App\Http\Controllers\Api\FinancialGoalController;
 
@@ -38,6 +40,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index']);
 
+    Route::get('/statistics', [StatisticsController::class, 'index']);
+
+
     Route::get('/financial-health', [FinancialHealthController::class, 'index']);
     Route::post('/financial-health/chat', [FinancialHealthController::class, 'chat']);
 
@@ -49,6 +54,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/goals/{id}/funds',[FinancialGoalController::class, 'updateFunds']);
     
 });
+
+
 
 Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'])
     ->middleware(['signed'])
