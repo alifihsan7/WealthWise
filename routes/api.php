@@ -22,6 +22,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/accounts', [AccountController::class, 'index']);
     Route::post('/accounts', [AccountController::class, 'store']);
     Route::get('/accounts/total', [AccountController::class, 'totalBalance']);
+
+    Route::get('/accounts/{id}', [AccountController::class, 'show']);    // Untuk ambil 1 data saat Edit
+    Route::put('/accounts/{id}', [AccountController::class, 'update']);  // Untuk simpan perubahan Edit
+    Route::delete('/accounts/{id}', [AccountController::class, 'destroy']); // Untuk hapus akun
     
     Route::get('/transactions', [TransactionController::class, 'index']);
     Route::post('/transactions/add', [TransactionController::class, 'store']);
