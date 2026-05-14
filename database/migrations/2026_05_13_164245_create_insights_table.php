@@ -13,6 +13,12 @@ return new class extends Migration
     {
         Schema::create('insights', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete(); // Relasi ke user
+            $table->string('emoji', 10)->nullable();
+            $table->string('title');
+            $table->text('desc');
+            $table->string('actionLabel')->nullable();
+            $table->boolean('urgent')->default(false);
             $table->timestamps();
         });
     }

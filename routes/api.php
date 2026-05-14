@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\FinancialStatsController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\FinancialHealthController;
+use App\Http\Controllers\Api\FinancialGoalController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -45,6 +46,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/goals/{id}', [FinancialGoalController::class, 'show']);
     Route::put('/goals/{id}', [FinancialGoalController::class, 'update']);
     Route::delete('/goals/{id}', [FinancialGoalController::class, 'destroy']);
+    Route::put('/goals/{id}/funds',[FinancialGoalController::class, 'updateFunds']);
+    
 });
 
 Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'])
