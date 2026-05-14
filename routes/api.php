@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\TransactionController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\FinancialStatsController;
 use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\ReceiptScanController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -35,6 +36,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/stats/summary', [FinancialStatsController::class, 'index']);
 
     Route::get('/dashboard', [DashboardController::class, 'index']);
+    Route::post('/receipt/scan', [ReceiptScanController::class, 'scan']);
 });
 
 Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'])
