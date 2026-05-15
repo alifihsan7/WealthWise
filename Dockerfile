@@ -30,6 +30,9 @@ RUN composer install --no-dev --optimize-autoloader --no-scripts --no-interactio
 # Copy the rest of the application
 COPY . .
 
+# Recreate directories excluded by .dockerignore that Laravel requires
+RUN mkdir -p bootstrap/cache storage/logs storage/framework/cache storage/framework/sessions storage/framework/views
+
 # Regenerate autoloader with scripts now that all files are present
 RUN composer dump-autoload --optimize
 
