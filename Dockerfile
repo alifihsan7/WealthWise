@@ -12,6 +12,9 @@ RUN apt-get update && apt-get upgrade -y \
 # Enable mod_rewrite for Laravel routing
 RUN a2enmod rewrite
 
+# Mencegah error Apache MPM
+RUN a2dismod mpm_event && a2enmod mpm_prefork
+
 # Point Apache document root to Laravel /public
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
