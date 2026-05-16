@@ -1,4 +1,6 @@
-FROM php:8.2-apache
+FROM php:8.2-apach
+
+ENV FORCE_REBUILD=1
 
 RUN apt-get update && apt-get install -y \
     libpq-dev \
