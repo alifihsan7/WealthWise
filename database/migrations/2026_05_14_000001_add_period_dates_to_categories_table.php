@@ -9,9 +9,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('categories', function (Blueprint $table) {
-            $table->enum('budget_period', ['WEEKLY', 'MONTHLY', 'YEARLY'])->nullable()->after('budget_limit');
-            $table->date('start_date')->nullable()->after('budget_period');
-            $table->date('end_date')->nullable()->after('start_date');
+            if (!Schema::hasColumn('categories', 'budget_period')) {
+                $table->enum('budget_period', ['WEEKLY', 'MONTHLY', 'YEARLY'])->nullable()->after('budget_limit');
+            }
+            if (!Schema::hasColumn('categories', 'start_date')) {
+                $table->date('start_date')->nullable()->after('budget_period');
+            }
+            if (!Schema::hasColumn('categories', 'end_date')) {
+                $table->date('end_date')->nullable()->after('start_date');
+            }
         });
     }
 
