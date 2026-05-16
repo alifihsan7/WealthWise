@@ -1,4 +1,4 @@
-FROM php:8.2-apach
+FROM php:8.2-apache
 
 ENV FORCE_REBUILD=1
 
