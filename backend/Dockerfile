@@ -25,8 +25,10 @@ COPY . .
 # Install PHP dependencies (--no-scripts to skip artisan during build — no .env yet)
 RUN composer install --no-dev --optimize-autoloader --no-scripts
 
-# Set storage & cache permissions
-RUN chown -R www-data:www-data storage bootstrap/cache \
+# Ensure Laravel directories exist, then set permissions
+RUN mkdir -p storage/app/public storage/framework/cache storage/framework/sessions \
+        storage/framework/views storage/logs bootstrap/cache \
+    && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
 # Register entrypoint script
