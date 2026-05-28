@@ -18,8 +18,7 @@ fi
 # Run migrations automatically on every deploy
 php artisan migrate --force
 
-# Cache config/views for production performance (route:cache skipped — has closure routes)
-php artisan config:cache
+# Cache views for production performance
 php artisan view:cache
 
 # Create storage symlink for public file access
