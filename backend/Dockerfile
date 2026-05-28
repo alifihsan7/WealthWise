@@ -22,8 +22,8 @@ WORKDIR /var/www/html
 # Copy app files
 COPY . .
 
-# Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader
+# Install PHP dependencies (--no-scripts to skip artisan during build — no .env yet)
+RUN composer install --no-dev --optimize-autoloader --no-scripts
 
 # Set storage & cache permissions
 RUN chown -R www-data:www-data storage bootstrap/cache \
