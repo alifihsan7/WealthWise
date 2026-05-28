@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-# Railway injects $PORT dynamically — Apache must listen on it
+# Render injects $PORT dynamically — Apache must listen on it
 PORT=${PORT:-80}
 
 sed -i "s/Listen 80/Listen ${PORT}/" /etc/apache2/ports.conf
